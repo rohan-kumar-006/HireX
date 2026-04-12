@@ -14,6 +14,17 @@ const Applicants = () => {
         fetchApplicants();
     }, [jobId]);
 
+    const handleStatus = async (id, status) => {
+        try {
+            await API.put(`/applications/${id}/status`, { status });
+            setApplicants(applicants.map(app => 
+                app._id === id ? { ...app, status } : app
+            ));
+        } catch (error) {
+            alert('Error updating status');
+        }
+    };
+
     return (
         <div className="max-w-5xl mx-auto p-8">
             <h2 className="text-2xl font-bold mb-6">Applicants (Ranked by AI match)</h2>
@@ -21,7 +32,16 @@ const Applicants = () => {
                 {applicants.map(app => (
                     <div key={app._id} className="bg-white p-6 rounded-lg border border-gray-200 flex justify-between items-start">
                         <div className="w-2/3">
-                            <h3 className="font-bold text-lg">{app.student.name}</h3>
+                            <div className="flex items-center gap-3 mb-1">
+                                <h3 className="font-bold text-lg">{app.student.name}</h3>
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                    app.status === 'accepted' ? 'bg-green-100 text-green-700' :
+                                    app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                    'bg-blue-100 text-blue-700'
+                                }`}>
+                                    {app.status}
+                                </span>
+                            </div>
                             <p className="text-gray-600 text-sm mb-4">{app.student.email}</p>
                             
                             <div className="mb-4">
@@ -53,6 +73,23 @@ const Applicants = () => {
                                 </a>
                             ) : (
                                 <p className="mt-6 text-xs text-red-500 font-bold uppercase">No resume</p>
+                            )}
+
+                            {app.status === 'applied' && (
+                                <div className="mt-4 flex gap-2 justify-end">
+                                    <button 
+                                        onClick={() => handleStatus(app._id, 'accepted')}
+                                        className="bg-green-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-green-700"
+                                    >
+                                        Accept
+                                    </button>
+                                    <button 
+                                        onClick={() => handleStatus(app._id, 'rejected')}
+                                        className="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700"
+                                    >
+                                        Reject
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>

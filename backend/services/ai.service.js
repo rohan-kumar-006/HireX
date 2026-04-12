@@ -1,30 +1,50 @@
-const Groq = require('groq-sdk');
+const axios = require('axios');
 
-const groq = new Groq({
-    apiKey: process.env.GROQ_API_KEY
-});
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
+// 🔹 Analyze Resume
 const analyzeResume = async (resumeText) => {
     try {
         const prompt = `Analyze this resume text and return a JSON object with: 
         1. "skills" (array of skills found)
         2. "summary" (brief 2 line summary)
         3. "suggestions" (array of 3 improvements)
+
+        IMPORTANT: Return ONLY valid JSON.
+
         Resume: ${resumeText}`;
 
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [{ role: 'user', content: prompt }],
-            model: 'llama3-8b-8192',
-            response_format: { type: "json_object" }
-        });
+        const response = await axios.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                model: "mistralai/mixtral-8x7b-instruct",
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.3
+            },
+            {
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-        return JSON.parse(chatCompletion.choices[0].message.content);
+        const result = response.data.choices[0].message.content;
+
+        try {
+            return JSON.parse(result);
+        } catch {
+            console.error("Parse Error:", result);
+            return { skills: [], summary: "Parsing error", suggestions: [] };
+        }
+
     } catch (error) {
-        console.error("AI Error:", error);
+        console.error("AI Error:", error.response?.data || error.message);
         return { skills: [], summary: "Error analyzing", suggestions: [] };
     }
 };
 
+// 🔹 Match Job
 const matchJob = async (resumeText, jobDescription) => {
     try {
         const prompt = `Compare this resume text with the job description. 
@@ -32,19 +52,38 @@ const matchJob = async (resumeText, jobDescription) => {
         1. "matchScore" (a number between 0-100)
         2. "missingSkills" (array of skills required but not in resume)
         3. "feedback" (one line feedback)
+
+        IMPORTANT: Return ONLY valid JSON.
         
         Resume: ${resumeText}
         Job Description: ${jobDescription}`;
 
-        const chatCompletion = await groq.chat.completions.create({
-            messages: [{ role: 'user', content: prompt }],
-            model: 'llama3-8b-8192',
-            response_format: { type: "json_object" }
-        });
+        const response = await axios.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                model: "mistralai/mixtral-8x7b-instruct",
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.3
+            },
+            {
+                headers: {
+                    "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                    "Content-Type": "application/json"
+                }
+            }
+        );
 
-        return JSON.parse(chatCompletion.choices[0].message.content);
+        const result = response.data.choices[0].message.content;
+
+        try {
+            return JSON.parse(result);
+        } catch {
+            console.error("Parse Error:", result);
+            return { matchScore: 0, missingSkills: [], feedback: "Parsing error" };
+        }
+
     } catch (error) {
-        console.error("AI Match Error:", error);
+        console.error("AI Match Error:", error.response?.data || error.message);
         return { matchScore: 0, missingSkills: [], feedback: "Error matching" };
     }
 };

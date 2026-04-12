@@ -13,7 +13,6 @@ const applyToJob = async (req, res) => {
         const jobId = req.params.jobId;
         const studentId = req.user.id;
 
-        // Check if already applied
         const existing = await Application.findOne({ job: jobId, student: studentId });
         if (existing) return res.status(400).json({ message: 'Already applied' });
 
@@ -24,14 +23,29 @@ const applyToJob = async (req, res) => {
             return res.status(400).json({ message: 'Please upload your resume in your profile first' });
         }
 
-        // AI Matching (uses saved resume text)
-        const aiResult = await matchJob(student.profile.resumeText, job.description);
+        // 1. Skill Based Matching (Simple logic)
+        const userSkills = student.profile.skills || [];
+        const jobSkills = job.requirements || [];
+        const matchedSkills = userSkills.filter(skill => 
+            jobSkills.some(js => js.toLowerCase() === skill.toLowerCase())
+        );
+        
+        const skillScore = jobSkills.length > 0 
+            ? (matchedSkills.length / jobSkills.length) * 100 
+            : 100;
 
+        // 2. AI Based Matching
+        const aiResult = await matchJob(student.profile.resumeText || "", job.description);
+        console.log(aiResult," Ai Score");
+        // 3. Combine Scores
+        const finalMatchScore = Math.round((skillScore + aiResult.matchScore) / 2);
+        console.log(finalMatchScore," finalMatchScore");
+        
         const application = new Application({
             job: jobId,
             student: studentId,
-            matchScore: aiResult.matchScore,
-            missingSkills: aiResult.missingSkills
+            matchScore: finalMatchScore,
+            missingSkills: aiResult.missingSkills || []
         });
 
         await application.save();
@@ -82,11 +96,40 @@ const getApplicants = async (req, res) => {
 
 const getMyApplications = async (req, res) => {
     try {
-        const apps = await Application.find({ student: req.user.id }).populate('job');
+        const apps = await Application.find({ student: req.user.id })
+            .populate({
+                path: 'job',
+                populate: { path: 'recruiter', select: 'name' }
+            });
         res.json(apps);
     } catch (err) {
         res.status(500).json({ message: 'Error fetching applications' });
     }
 };
 
-module.exports = { applyToJob, uploadResume, getApplicants, getMyApplications };
+const updateStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+        const applicationId = req.params.id;
+
+        if (req.user.role !== 'recruiter') {
+            return res.status(403).json({ message: 'Only recruiters can update status' });
+        }
+
+        const application = await Application.findByIdAndUpdate(
+            applicationId,
+            { status },
+            { new: true }
+        );
+
+        if (!application) {
+            return res.status(404).json({ message: 'Application not found' });
+        }
+
+        res.json({ message: `Application ${status}`, application });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating status' });
+    }
+};
+
+module.exports = { applyToJob, uploadResume, getApplicants, getMyApplications, updateStatus };

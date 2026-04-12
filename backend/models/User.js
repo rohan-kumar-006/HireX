@@ -11,6 +11,8 @@ const userSchema = new mongoose.Schema({
         college: String,
         experience: String,
         resume: String,
+        resumeText: String,
+        resumeName: String,
         googleId: String
     }
 }, { timestamps: true });

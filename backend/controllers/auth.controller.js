@@ -2,6 +2,8 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
+const pdf = require('pdf-parse');
+const fs = require('fs');
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -114,12 +116,19 @@ const uploadResume = async (req, res) => {
 
         const resumePath = `/uploads/${req.file.filename}`;
         
+        // Extract text from PDF
+        const dataBuffer = fs.readFileSync(req.file.path);
+        const pdfData = await pdf(dataBuffer);
+        const extractedText = pdfData.text;
         await User.findByIdAndUpdate(req.user.id, {
-            'profile.resume': resumePath
+            'profile.resume': resumePath,
+            'profile.resumeText': extractedText,
+            'profile.resumeName': req.file.originalname
         });
 
-        res.json({ message: 'Resume uploaded successfully', resume: resumePath });
+        res.json({ message: 'Resume uploaded and text extracted successfully', resume: resumePath });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Error uploading resume' });
     }
 };

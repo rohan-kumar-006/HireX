@@ -6,7 +6,7 @@ const MyApplications = () => {
 
     useEffect(() => {
         const fetchApps = async () => {
-            const { data } = await API.get('/applications/my-apps');
+            const { data } = await API.get('/applications/user');
             setApps(data);
         };
         fetchApps();
@@ -38,7 +38,7 @@ const MyApplications = () => {
                                 </td>
                                 <td className="p-4">
                                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                                        app.status === 'shortlisted' ? 'bg-green-100 text-green-700' :
+                                        app.status === 'accepted' ? 'bg-green-100 text-green-700' :
                                         app.status === 'rejected' ? 'bg-red-100 text-red-700' :
                                         'bg-blue-100 text-blue-700'
                                     }`}>
