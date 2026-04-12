@@ -20,7 +20,10 @@ const Navbar = () => {
                 {user ? (
                     <>
                         {user.role === 'recruiter' && (
-                            <Link to="/post-job" className="text-gray-600 hover:text-green-600">Post Job</Link>
+                            <>
+                                <Link to="/my-jobs" className="text-gray-600 hover:text-green-600">My Jobs</Link>
+                                <Link to="/post-job" className="text-gray-600 hover:text-green-600">Post Job</Link>
+                            </>
                         )}
                         {user.role === 'student' && (
                             <Link to="/my-applications" className="text-gray-600 hover:text-green-600">My Apps</Link>

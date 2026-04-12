@@ -41,7 +41,19 @@ const Applicants = () => {
                         <div className="text-right">
                             <div className="text-3xl font-bold text-green-600">{app.matchScore}%</div>
                             <div className="text-xs text-gray-400 uppercase font-bold">Match Score</div>
-                            <button className="mt-6 text-sm text-blue-600 hover:underline">View Portfolio</button>
+                            
+                            {app.student.profile?.resume ? (
+                                <a 
+                                    href={`http://localhost:5000${app.student.profile.resume}`} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                    className="mt-6 inline-block bg-blue-50 text-blue-600 px-4 py-2 rounded text-sm font-bold hover:bg-blue-100 transition"
+                                >
+                                    View Resume
+                                </a>
+                            ) : (
+                                <p className="mt-6 text-xs text-red-500 font-bold uppercase">No resume</p>
+                            )}
                         </div>
                     </div>
                 ))}

@@ -6,6 +6,10 @@ const { matchJob, analyzeResume } = require('../services/ai.service');
 
 const applyToJob = async (req, res) => {
     try {
+        if (req.user.role === 'recruiter') {
+            return res.status(403).json({ message: 'Recruiters cannot apply for jobs' });
+        }
+
         const jobId = req.params.jobId;
         const studentId = req.user.id;
 
@@ -16,11 +20,11 @@ const applyToJob = async (req, res) => {
         const job = await Job.findById(jobId);
         const student = await User.findById(studentId);
 
-        if (!student.profile.resumeText) {
-            return res.status(400).json({ message: 'Please upload resume first' });
+        if (!student.profile.resume) {
+            return res.status(400).json({ message: 'Please upload your resume in your profile first' });
         }
 
-        // AI Matching
+        // AI Matching (uses saved resume text)
         const aiResult = await matchJob(student.profile.resumeText, job.description);
 
         const application = new Application({
@@ -31,7 +35,7 @@ const applyToJob = async (req, res) => {
         });
 
         await application.save();
-        res.status(201).json({ message: 'Applied successfully', application });
+        res.status(201).json({ message: 'Applied successfully!', application });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error applying' });
@@ -51,6 +55,7 @@ const uploadResume = async (req, res) => {
 
         await User.findByIdAndUpdate(req.user.id, {
             'profile.resumeText': resumeText,
+            'profile.resumeName': req.file.originalname,
             'profile.skills': analysis.skills,
             'profile.bio': analysis.summary
         });

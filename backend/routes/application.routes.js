@@ -11,5 +11,6 @@ router.post('/apply/:jobId', auth, applyToJob);
 router.post('/resume', auth, upload.single('resume'), uploadResume);
 router.get('/job/:jobId', auth, getApplicants);
 router.get('/my-apps', auth, getMyApplications);
+router.get('/user', auth, getMyApplications);
 
 module.exports = router;

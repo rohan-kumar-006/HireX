@@ -4,7 +4,8 @@ import API from '../api';
 
 const PostJob = () => {
     const [jobData, setJobData] = useState({
-        title: '', description: '', requirements: '', location: '', salary: ''
+        title: '', description: '', requirements: '', location: '', salary: '',
+        workType: 'On-site', salaryMin: '', salaryMax: ''
     });
     const navigate = useNavigate();
 
@@ -41,9 +42,26 @@ const PostJob = () => {
                         <input className="input-field" onChange={(e) => setJobData({...jobData, location: e.target.value})} />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium mb-1">Salary Range</label>
-                        <input className="input-field" onChange={(e) => setJobData({...jobData, salary: e.target.value})} />
+                        <label className="block text-sm font-medium mb-1">Work Type</label>
+                        <select className="input-field" value={jobData.workType} onChange={(e) => setJobData({...jobData, workType: e.target.value})}>
+                            <option value="On-site">On-site</option>
+                            <option value="Remote">Remote</option>
+                        </select>
                     </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Min Salary</label>
+                        <input type="number" className="input-field" placeholder="e.g. 50000" onChange={(e) => setJobData({...jobData, salaryMin: e.target.value})} />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium mb-1">Max Salary</label>
+                        <input type="number" className="input-field" placeholder="e.g. 80000" onChange={(e) => setJobData({...jobData, salaryMax: e.target.value})} />
+                    </div>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Salary Display Text</label>
+                    <input className="input-field" placeholder="e.g. $50k - $80k per year" onChange={(e) => setJobData({...jobData, salary: e.target.value})} />
                 </div>
                 <button type="submit" className="w-full btn-primary py-3">Post Job</button>
             </form>

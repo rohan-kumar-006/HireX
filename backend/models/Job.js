@@ -6,7 +6,10 @@ const jobSchema = new mongoose.Schema({
     requirements: [String],
     recruiter: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     location: String,
-    salary: String
+    salary: String,
+    workType: { type: String, enum: ['Remote', 'On-site'], default: 'On-site' },
+    salaryMin: Number,
+    salaryMax: Number
 }, { timestamps: true });
 
 module.exports = mongoose.model('Job', jobSchema);

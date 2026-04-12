@@ -108,4 +108,20 @@ const updateProfile = async (req, res) => {
     }
 };
 
-module.exports = { signup, login, googleLogin, getUser, updateProfile };
+const uploadResume = async (req, res) => {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+
+        const resumePath = `/uploads/${req.file.filename}`;
+        
+        await User.findByIdAndUpdate(req.user.id, {
+            'profile.resume': resumePath
+        });
+
+        res.json({ message: 'Resume uploaded successfully', resume: resumePath });
+    } catch (err) {
+        res.status(500).json({ message: 'Error uploading resume' });
+    }
+};
+
+module.exports = { signup, login, googleLogin, getUser, updateProfile, uploadResume };

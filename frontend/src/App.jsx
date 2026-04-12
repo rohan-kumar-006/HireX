@@ -9,6 +9,7 @@ import Profile from './pages/Profile';
 import PostJob from './pages/PostJob';
 import Applicants from './pages/Applicants';
 import MyApplications from './pages/MyApplications';
+import MyJobs from './pages/MyJobs';
 import EditProfile from './pages/EditProfile';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 
@@ -28,6 +29,7 @@ function App() {
           <Route path="/post-job" element={<PostJob />} />
           <Route path="/applicants/:jobId" element={<Applicants />} />
           <Route path="/my-applications" element={<MyApplications />} />
+          <Route path="/my-jobs" element={<MyJobs />} />
         </Routes>
       </div>
     </Router>

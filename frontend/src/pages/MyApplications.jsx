@@ -22,17 +22,27 @@ const MyApplications = () => {
                             <th className="p-4 font-bold text-sm">Job Title</th>
                             <th className="p-4 font-bold text-sm">Company</th>
                             <th className="p-4 font-bold text-sm">Match Score</th>
+                            <th className="p-4 font-bold text-sm">Status</th>
                             <th className="p-4 font-bold text-sm">Applied Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         {apps.map(app => (
                             <tr key={app._id} className="border-b hover:bg-gray-50 transition">
-                                <td className="p-4">{app.job.title}</td>
-                                <td className="p-4 font-medium">{app.job.recruiter?.name || 'Company'}</td>
+                                <td className="p-4 font-medium">{app.job?.title || 'Job Deleted'}</td>
+                                <td className="p-4 text-gray-600">{app.job?.recruiter?.name || 'Company'}</td>
                                 <td className="p-4">
-                                    <span className={`font-bold ${app.matchScore > 70 ? 'text-green-600' : 'text-gray-600'}`}>
+                                    <span className={`font-bold ${app.matchScore > 70 ? 'text-green-600' : 'text-orange-600'}`}>
                                         {app.matchScore}%
+                                    </span>
+                                </td>
+                                <td className="p-4">
+                                    <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
+                                        app.status === 'shortlisted' ? 'bg-green-100 text-green-700' :
+                                        app.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                                        'bg-blue-100 text-blue-700'
+                                    }`}>
+                                        {app.status}
                                     </span>
                                 </td>
                                 <td className="p-4 text-gray-500 text-sm">
