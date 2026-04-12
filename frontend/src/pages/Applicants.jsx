@@ -1,0 +1,55 @@
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import API from '../api';
+
+const Applicants = () => {
+    const { jobId } = useParams();
+    const [applicants, setApplicants] = useState([]);
+
+    useEffect(() => {
+        const fetchApplicants = async () => {
+            const { data } = await API.get(`/applications/job/${jobId}`);
+            setApplicants(data);
+        };
+        fetchApplicants();
+    }, [jobId]);
+
+    return (
+        <div className="max-w-5xl mx-auto p-8">
+            <h2 className="text-2xl font-bold mb-6">Applicants (Ranked by AI match)</h2>
+            <div className="space-y-4">
+                {applicants.map(app => (
+                    <div key={app._id} className="bg-white p-6 rounded-lg border border-gray-200 flex justify-between items-start">
+                        <div className="w-2/3">
+                            <h3 className="font-bold text-lg">{app.student.name}</h3>
+                            <p className="text-gray-600 text-sm mb-4">{app.student.email}</p>
+                            
+                            <div className="mb-4">
+                                <p className="font-bold text-sm text-red-600">Missing Skills Gaps:</p>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {app.missingSkills.map(skill => (
+                                        <span key={skill} className="bg-red-50 text-red-700 border border-red-100 px-2 py-0.5 rounded text-xs">
+                                            {skill}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <p className="text-sm text-gray-500 italic">"{app.student.profile.bio?.substring(0, 100)}..."</p>
+                        </div>
+
+                        <div className="text-right">
+                            <div className="text-3xl font-bold text-green-600">{app.matchScore}%</div>
+                            <div className="text-xs text-gray-400 uppercase font-bold">Match Score</div>
+                            <button className="mt-6 text-sm text-blue-600 hover:underline">View Portfolio</button>
+                        </div>
+                    </div>
+                ))}
+
+                {applicants.length === 0 && <p className="text-gray-500">No applicants yet.</p>}
+            </div>
+        </div>
+    );
+};
+
+export default Applicants;

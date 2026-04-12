@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f9fafb;
+}
+
+.btn-primary {
+  @apply bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition;
+}
+
+.input-field {
+  @apply border border-gray-300 p-2 rounded w-full focus:outline-none focus:border-green-500;
+}

@@ -1,0 +1,18 @@
+# Node modules
+node_modules/
+.npm/
+
+# Backend specific
+backend/uploads/
+backend/.env
+
+# Frontend specific
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# IDE/OS specific
+.vscode/
+.idea/
+.DS_Store
+*.log
