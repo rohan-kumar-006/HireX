@@ -10,7 +10,20 @@ const processResumeAnalysis = async (req, res) => {
         const resumeText = pdfData.text;
 
         const analysis = await analyzeResume(resumeText);
-        res.json(analysis);
+        const role = req.user.role;
+
+        let filteredAnalysis = { summary: analysis.summary };
+
+        if (role === 'student') {
+            filteredAnalysis.positives = analysis.positives;
+            filteredAnalysis.suggestions = analysis.suggestions;
+        } else if (role === 'recruiter') {
+            filteredAnalysis.skills = analysis.skills;
+            filteredAnalysis.negatives = analysis.negatives;
+        }
+
+        res.json(filteredAnalysis);
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Error analyzing resume' });

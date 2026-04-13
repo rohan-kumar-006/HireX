@@ -13,12 +13,18 @@ import MyJobs from './pages/MyJobs';
 import EditProfile from './pages/EditProfile';
 import ResumeAnalyzer from './pages/ResumeAnalyzer';
 
+import ChatPage from './pages/ChatPage';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 function App() {
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Navbar />
+        <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
+
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
@@ -30,10 +36,14 @@ function App() {
           <Route path="/applicants/:jobId" element={<Applicants />} />
           <Route path="/my-applications" element={<MyApplications />} />
           <Route path="/my-jobs" element={<MyJobs />} />
+          <Route path="/chat" element={<ChatPage />} />
+          <Route path="/chat/:jobId/:applicantId" element={<ChatPage />} />
+
         </Routes>
       </div>
     </Router>
   );
 }
+
 
 export default App;

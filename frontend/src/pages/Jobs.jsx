@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import API from '../api';
 
 const Jobs = () => {
@@ -37,13 +38,14 @@ const Jobs = () => {
         setApplying(true);
         try {
             const { data } = await API.post(`/applications/apply/${id}`);
-            alert(data.message || 'Applied successfully!');
+            toast.success(data.message || 'Applied successfully');
         } catch (error) {
-            alert(error.response?.data?.message || 'Apply failed');
+            toast.error(error.response?.data?.message || 'Apply failed');
         } finally {
             setApplying(false);
         }
     };
+
 
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">

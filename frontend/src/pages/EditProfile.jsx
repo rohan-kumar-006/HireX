@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../api';
 
+import { toast } from 'react-toastify';
+
 const EditProfile = () => {
     const [formData, setFormData] = useState({
         name: '', bio: '', college: '', skills: '', linkedin: '', portfolio: '',
@@ -37,12 +39,13 @@ const EditProfile = () => {
         e.preventDefault();
         try {
             await API.put('/auth/update', formData);
-            alert('Profile updated successfully');
+            toast.success('Profile updated successfully');
             navigate('/profile');
         } catch (err) {
-            alert('Update failed');
+            toast.error('Update failed');
         }
     };
+
 
     return (
         <div className="max-w-2xl mx-auto p-8 bg-white border rounded-lg mt-10 shadow-sm">

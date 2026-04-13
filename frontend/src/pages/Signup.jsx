@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import API from '../api';
 
 const Signup = () => {
@@ -14,11 +15,13 @@ const Signup = () => {
             const { data } = await API.post('/auth/signup', formData);
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            toast.success('Account created successfully');
             navigate('/');
         } catch (error) {
-            alert(error.response?.data?.message || 'Signup failed');
+            toast.error(error.response?.data?.message || 'Signup failed');
         }
     };
+
 
     return (
         <div className="max-w-md mx-auto mt-20 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">

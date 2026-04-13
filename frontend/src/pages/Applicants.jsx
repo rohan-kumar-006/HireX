@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import API from '../api';
 
 const Applicants = () => {
@@ -74,6 +74,18 @@ const Applicants = () => {
                             ) : (
                                 <p className="mt-6 text-xs text-red-500 font-bold uppercase">No resume</p>
                             )}
+
+                            <Link 
+                                to={`/chat/${jobId}/${app.student._id}`}
+                                state={{ 
+                                    jobTitle: "Job Application", 
+                                    otherUserName: app.student.name, 
+                                    otherUserId: app.student._id 
+                                }}
+                                className="mt-2 block bg-green-50 text-green-600 px-4 py-2 rounded text-sm font-bold hover:bg-green-100 transition text-center"
+                            >
+                                Chat
+                            </Link>
 
                             {app.status === 'applied' && (
                                 <div className="mt-4 flex gap-2 justify-end">

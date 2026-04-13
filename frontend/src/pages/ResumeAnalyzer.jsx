@@ -52,22 +52,45 @@ const ResumeAnalyzer = () => {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="p-4 bg-gray-50 rounded border border-gray-200">
-                            <h3 className="font-bold text-gray-800 mb-2">Extracted Skills</h3>
-                            <div className="flex flex-wrap gap-2">
-                                {analysis.skills?.map(s => (
-                                    <span key={s} className="bg-white px-2 py-1 rounded border text-xs">{s}</span>
-                                ))}
+                        {analysis.skills && (
+                            <div className="p-4 bg-gray-50 rounded border border-gray-200">
+                                <h3 className="font-bold text-gray-800 mb-2">Extracted Skills</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {analysis.skills.map(s => (
+                                        <span key={s} className="bg-white px-2 py-1 rounded border text-xs">{s}</span>
+                                    ))}
+                                </div>
                             </div>
-                        </div>
+                        )}
 
-                        <div className="p-4 bg-yellow-50 rounded border border-yellow-100">
-                            <h3 className="font-bold text-yellow-800 mb-2">AI Suggestions</h3>
-                            <ul className="list-disc list-inside text-sm text-gray-700">
-                                {analysis.suggestions?.map((s, i) => <li key={i}>{s}</li>)}
-                            </ul>
-                        </div>
+                        {analysis.positives && (
+                            <div className="p-4 bg-green-50 rounded border border-green-100">
+                                <h3 className="font-bold text-green-800 mb-2">Resume Strengths</h3>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                    {analysis.positives.map((s, i) => <li key={i}>{s}</li>)}
+                                </ul>
+                            </div>
+                        )}
+
+                        {analysis.negatives && (
+                            <div className="p-4 bg-red-50 rounded border border-red-100">
+                                <h3 className="font-bold text-red-800 mb-2">Missing/Weak Areas</h3>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                    {analysis.negatives.map((s, i) => <li key={i}>{s}</li>)}
+                                </ul>
+                            </div>
+                        )}
+
+                        {analysis.suggestions && (
+                            <div className="p-4 bg-yellow-50 rounded border border-yellow-100">
+                                <h3 className="font-bold text-yellow-800 mb-2">AI Suggestions</h3>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                    {analysis.suggestions.map((s, i) => <li key={i}>{s}</li>)}
+                                </ul>
+                            </div>
+                        )}
                     </div>
+
                 </div>
             )}
         </div>

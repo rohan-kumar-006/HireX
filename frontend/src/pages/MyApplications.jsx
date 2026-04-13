@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import API from '../api';
 
 const MyApplications = () => {
@@ -13,7 +14,7 @@ const MyApplications = () => {
     }, []);
 
     return (
-        <div className="max-w-4xl mx-auto p-8">
+        <div className="max-w-6xl mx-auto p-8">
             <h2 className="text-2xl font-bold mb-6">My Job Applications</h2>
             <div className="bg-white border rounded-lg overflow-hidden shadow-sm">
                 <table className="w-full text-left">
@@ -51,7 +52,9 @@ const MyApplications = () => {
                             </tr>
                         ))}
                     </tbody>
+
                 </table>
+
                 {apps.length === 0 && <p className="p-8 text-center text-gray-500">You haven't applied to any jobs yet.</p>}
             </div>
         </div>

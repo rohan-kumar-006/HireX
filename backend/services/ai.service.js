@@ -9,10 +9,13 @@ const analyzeResume = async (resumeText) => {
         1. "skills" (array of skills found)
         2. "summary" (brief 2 line summary)
         3. "suggestions" (array of 3 improvements)
+        4. "positives" (array of 3 strengths)
+        5. "negatives" (array of 3 weak points/missing areas)
 
         IMPORTANT: Return ONLY valid JSON.
 
         Resume: ${resumeText}`;
+
 
         const response = await axios.post(
             "https://openrouter.ai/api/v1/chat/completions",
@@ -35,13 +38,14 @@ const analyzeResume = async (resumeText) => {
             return JSON.parse(result);
         } catch {
             console.error("Parse Error:", result);
-            return { skills: [], summary: "Parsing error", suggestions: [] };
+            return { skills: [], summary: "Parsing error", suggestions: [], positives: [], negatives: [] };
         }
 
     } catch (error) {
         console.error("AI Error:", error.response?.data || error.message);
-        return { skills: [], summary: "Error analyzing", suggestions: [] };
+        return { skills: [], summary: "Error analyzing", suggestions: [], positives: [], negatives: [] };
     }
+
 };
 
 // 🔹 Match Job
