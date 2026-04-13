@@ -6,13 +6,21 @@ const userSchema = new mongoose.Schema({
     password: { type: String },
     role: { type: String, enum: ['student', 'recruiter'], required: true },
     profile: {
+        // Shared & Student Fields
         skills: [String],
         bio: String,
         college: String,
-        experience: String,
+        linkedin: String, // New
+        portfolio: String, // New
         resume: String,
         resumeText: String,
         resumeName: String,
+        
+        // Recruiter Specific Fields
+        companyName: String, // New
+        companyDescription: String, // New
+        ongoingProjects: String, // New
+        
         googleId: String
     }
 }, { timestamps: true });

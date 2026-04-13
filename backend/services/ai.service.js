@@ -50,8 +50,7 @@ const matchJob = async (resumeText, jobDescription) => {
         const prompt = `Compare this resume text with the job description. 
         Return a JSON object with: 
         1. "matchScore" (a number between 0-100)
-        2. "missingSkills" (array of skills required but not in resume)
-        3. "feedback" (one line feedback)
+        2. "explanation" (one line feedback on why this score was given)
 
         IMPORTANT: Return ONLY valid JSON.
         
@@ -79,12 +78,12 @@ const matchJob = async (resumeText, jobDescription) => {
             return JSON.parse(result);
         } catch {
             console.error("Parse Error:", result);
-            return { matchScore: 0, missingSkills: [], feedback: "Parsing error" };
+            return { matchScore: 0, explanation: "Parsing error" };
         }
 
     } catch (error) {
         console.error("AI Match Error:", error.response?.data || error.message);
-        return { matchScore: 0, missingSkills: [], feedback: "Error matching" };
+        return { matchScore: 0, explanation: "Error matching" };
     }
 };
 

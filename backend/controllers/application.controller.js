@@ -14,7 +14,10 @@ const applyToJob = async (req, res) => {
         const studentId = req.user.id;
 
         const existing = await Application.findOne({ job: jobId, student: studentId });
-        if (existing) return res.status(400).json({ message: 'Already applied' });
+        if (existing) {
+            console.log(`[DUPLICATE DETECTED] User ${studentId} already applied to Job ${jobId}`);
+            return res.status(400).json({ message: 'Already applied' });
+        }
 
         const job = await Job.findById(jobId);
         const student = await User.findById(studentId);
@@ -37,21 +40,32 @@ const applyToJob = async (req, res) => {
         // 2. AI Based Matching
         const aiResult = await matchJob(student.profile.resumeText || "", job.description);
         console.log(aiResult," Ai Score");
+        
         // 3. Combine Scores
         const finalMatchScore = Math.round((skillScore + aiResult.matchScore) / 2);
         console.log(finalMatchScore," finalMatchScore");
+
+        // 4. Calculate Missing Skills manually (from structured data)
+        const missingSkills = jobSkills.filter(skill => 
+            !userSkills.some(us => us.toLowerCase() === skill.toLowerCase())
+        );
         
         const application = new Application({
             job: jobId,
             student: studentId,
             matchScore: finalMatchScore,
-            missingSkills: aiResult.missingSkills || []
+            missingSkills: missingSkills
         });
 
         await application.save();
+        console.log(`[APPLICATION CREATED] User ${studentId} applied to Job ${jobId}`);
         res.status(201).json({ message: 'Applied successfully!', application });
     } catch (err) {
-        console.error(err);
+        if (err.code === 11000) {
+            console.log(`[DB DUPLICATE PREVENTED] User ${req.user.id} tried applying again to Job ${req.params.jobId}`);
+            return res.status(400).json({ message: 'Already applied' });
+        }
+        console.error("Error in applyToJob:", err);
         res.status(500).json({ message: 'Error applying' });
     }
 };

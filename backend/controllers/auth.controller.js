@@ -88,24 +88,31 @@ const getUser = async (req, res) => {
 
 const updateProfile = async (req, res) => {
     try {
-        const { name, bio, college, skills, experience } = req.body;
+        const { id } = req.user;
+        const user = await User.findById(id);
+        const { 
+            name, bio, college, skills, linkedin, portfolio, 
+            companyName, companyDescription, ongoingProjects 
+        } = req.body;
         
-        const updateData = {
-            name,
-            'profile.bio': bio,
-            'profile.college': college,
-            'profile.experience': experience,
-            'profile.skills': Array.isArray(skills) ? skills : skills.split(',').map(s => s.trim())
-        };
+        user.name = name || user.name;
+        if (user.role === 'student') {
+            user.profile.bio = bio;
+            user.profile.college = college;
+            user.profile.linkedin = linkedin;
+            user.profile.portfolio = portfolio;
+            user.profile.skills = Array.isArray(skills) ? skills : (skills ? skills.split(',').map(s => s.trim()) : []);
+        } else if (user.role === 'recruiter') {
+            user.profile.companyName = companyName;
+            user.profile.companyDescription = companyDescription;
+            user.profile.ongoingProjects = ongoingProjects;
+            user.profile.linkedin = linkedin;
+        }
 
-        const user = await User.findByIdAndUpdate(
-            req.user.id,
-            { $set: updateData },
-            { new: true }
-        ).select('-password');
-
+        await user.save();
         res.json({ message: 'Profile updated', user });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Error updating profile' });
     }
 };

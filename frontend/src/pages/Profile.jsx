@@ -53,42 +53,68 @@ const Profile = () => {
                     <p className="font-bold text-xl mb-1">{user.name}</p>
                     <p className="text-gray-600 mb-4">{user.email}</p>
                     <div className="mb-4">
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded text-xs font-bold uppercase">
+                        <span className={`px-3 py-1 rounded text-xs font-bold uppercase ${user.role === 'student' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
                             {user.role}
                         </span>
                     </div>
                     <hr className="my-4" />
                     <div className="space-y-4">
-                        <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase">College</p>
-                            <p className="text-sm font-medium">{user.profile?.college || 'Not set'}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs font-bold text-gray-400 uppercase">Experience</p>
-                            <p className="text-sm font-medium">{user.profile?.experience || 'None'}</p>
-                        </div>
+                        {user.role === 'student' ? (
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase">College</p>
+                                <p className="text-sm font-medium">{user.profile?.college || 'Not set'}</p>
+                            </div>
+                        ) : (
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase">Company</p>
+                                <p className="text-sm font-medium">{user.profile?.companyName || 'Not set'}</p>
+                            </div>
+                        )}
+                        
+                        {user.profile?.linkedin && (
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase">LinkedIn</p>
+                                <a href={user.profile.linkedin} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">View Profile</a>
+                            </div>
+                        )}
+
+                        {user.role === 'student' && user.profile?.portfolio && (
+                            <div>
+                                <p className="text-xs font-bold text-gray-400 uppercase">Portfolio</p>
+                                <a href={user.profile.portfolio} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline">View Portfolio</a>
+                            </div>
+                        )}
                     </div>
                 </div>
 
                 <div className="col-span-2 space-y-6">
                     <div className="bg-white p-6 rounded-lg border border-gray-200">
-                        <h3 className="font-bold mb-2">About Me</h3>
-                        <p className="text-gray-700 whitespace-pre-line">{user.profile?.bio || 'Add a bio to your profile'}</p>
+                        <h3 className="font-bold mb-2">{user.role === 'student' ? 'About Me' : 'Company Description'}</h3>
+                        <p className="text-gray-700 whitespace-pre-line">
+                            {user.role === 'student' ? (user.profile?.bio || 'No bio added') : (user.profile?.companyDescription || 'No description added')}
+                        </p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg border border-gray-200">
-                        <h3 className="font-bold mb-4">Skills</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {user.profile?.skills?.map(skill => (
-                                <span key={skill} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
-                                    {skill}
-                                </span>
-                            ))}
-                            {(!user.profile?.skills || user.profile.skills.length === 0) && (
-                                <p className="text-gray-400 text-sm italic">No skills added yet</p>
-                            )}
+                    {user.role === 'student' ? (
+                        <div className="bg-white p-6 rounded-lg border border-gray-200">
+                            <h3 className="font-bold mb-4">Skills</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {user.profile?.skills?.map(skill => (
+                                    <span key={skill} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                                        {skill}
+                                    </span>
+                                ))}
+                                {(!user.profile?.skills || user.profile.skills.length === 0) && (
+                                    <p className="text-gray-400 text-sm italic">No skills added yet</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div className="bg-white p-6 rounded-lg border border-gray-200">
+                            <h3 className="font-bold mb-2">Ongoing Projects</h3>
+                            <p className="text-gray-700">{user.profile?.ongoingProjects || 'No active projects listed'}</p>
+                        </div>
+                    )}
 
                     {user.role === 'student' && (
                         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -115,11 +141,10 @@ const Profile = () => {
                                         </div>
                                         <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold uppercase">Uploaded</span>
                                     </div>
-                                    <p className="text-xs text-gray-400 mt-2 italic text-center">You can replace your resume below</p>
                                 </div>
                             ) : (
                                 <div className="p-8 border-2 border-dashed border-gray-200 rounded-lg text-center mb-6">
-                                    <p className="text-gray-500 text-sm">No resume uploaded yet. Please upload a PDF to apply for jobs.</p>
+                                    <p className="text-gray-500 text-sm">No resume uploaded yet.</p>
                                 </div>
                             )}
 

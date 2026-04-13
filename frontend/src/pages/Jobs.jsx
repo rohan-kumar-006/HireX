@@ -12,6 +12,7 @@ const Jobs = () => {
         minSalary: '',
         maxSalary: ''
     });
+    const [applying, setApplying] = useState(false);
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -32,11 +33,15 @@ const Jobs = () => {
     }, [searchParams, filters]);
 
     const handleApply = async (id) => {
+        if (applying) return;
+        setApplying(true);
         try {
             const { data } = await API.post(`/applications/apply/${id}`);
             alert(data.message || 'Applied successfully!');
         } catch (error) {
             alert(error.response?.data?.message || 'Apply failed');
+        } finally {
+            setApplying(false);
         }
     };
 
@@ -118,9 +123,10 @@ const Jobs = () => {
                             {user?.role === 'student' ? (
                                 <button
                                     onClick={() => handleApply(selectedJob._id)}
-                                    className="bg-green-600 text-white px-8 py-3 rounded-md font-bold hover:bg-green-700 transition mb-8 flex items-center"
+                                    disabled={applying}
+                                    className={`bg-green-600 text-white px-8 py-3 rounded-md font-bold hover:bg-green-700 transition mb-8 flex items-center ${applying ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    Quick Apply
+                                    {applying ? 'Applying...' : 'Quick Apply'}
                                 </button>
                             ) : user?.role === 'recruiter' ? (
                                 <div className="bg-yellow-50 text-yellow-700 p-4 rounded-lg mb-8 border border-yellow-100 text-sm">

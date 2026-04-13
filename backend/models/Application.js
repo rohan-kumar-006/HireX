@@ -8,4 +8,6 @@ const applicationSchema = new mongoose.Schema({
     status: { type: String, enum: ['applied', 'accepted', 'rejected'], default: 'applied' }
 }, { timestamps: true });
 
+applicationSchema.index({ student: 1, job: 1 }, { unique: true });
+
 module.exports = mongoose.model('Application', applicationSchema);
