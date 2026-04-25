@@ -9,7 +9,8 @@ const jobSchema = new mongoose.Schema({
     salary: String,
     workType: { type: String, enum: ['Remote', 'On-site'], default: 'On-site' },
     salaryMin: Number,
-    salaryMax: Number
+    salaryMax: Number,
+    isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Job', jobSchema);

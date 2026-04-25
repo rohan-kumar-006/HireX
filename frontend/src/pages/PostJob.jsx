@@ -59,10 +59,10 @@ const PostJob = () => {
                         <input type="number" className="input-field" placeholder="e.g. 80000" onChange={(e) => setJobData({...jobData, salaryMax: e.target.value})} />
                     </div>
                 </div>
-                <div>
+                {/* <div>
                     <label className="block text-sm font-medium mb-1">Salary Display Text</label>
                     <input className="input-field" placeholder="e.g. $50k - $80k per year" onChange={(e) => setJobData({...jobData, salary: e.target.value})} />
-                </div>
+                </div> */}
                 <button type="submit" className="w-full btn-primary py-3">Post Job</button>
             </form>
         </div>

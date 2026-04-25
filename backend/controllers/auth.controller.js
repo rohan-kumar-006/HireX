@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const pdf = require('pdf-parse');
 const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
 
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -50,7 +51,7 @@ const login = async (req, res) => {
 
 const googleLogin = async (req, res) => {
     try {
-        const { token, role } = req.body;
+        const { token } = req.body;
         const ticket = await client.verifyIdToken({
             idToken: token,
             audience: process.env.GOOGLE_CLIENT_ID
@@ -64,16 +65,45 @@ const googleLogin = async (req, res) => {
             user = new User({
                 name,
                 email,
-                role: role || 'student',
                 profile: { googleId: sub }
             });
             await user.save();
         }
 
+        const roleMissing = !user.role;
         const jwtToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secret');
-        res.json({ token: jwtToken, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+
+        res.json({
+            token: jwtToken,
+            user: { id: user._id, name: user.name, email: user.email, role: user.role },
+            roleMissing
+        });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ message: 'Google auth error' });
+    }
+};
+
+const setRole = async (req, res) => {
+    try {
+        const { role } = req.body;
+        const userId = req.user.id;
+
+        if (!['student', 'recruiter'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        user.role = role;
+        await user.save();
+
+        const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET || 'secret');
+
+        res.json({ message: 'Role updated', user: { id: user._id, name: user.name, email: user.email, role: user.role }, token });
+    } catch (err) {
+        res.status(500).json({ message: 'Error setting role' });
     }
 };
 
@@ -90,11 +120,11 @@ const updateProfile = async (req, res) => {
     try {
         const { id } = req.user;
         const user = await User.findById(id);
-        const { 
-            name, bio, college, skills, linkedin, portfolio, 
-            companyName, companyDescription, ongoingProjects 
+        const {
+            name, bio, college, skills, linkedin, portfolio,
+            companyName, companyDescription, ongoingProjects
         } = req.body;
-        
+
         user.name = name || user.name;
         if (user.role === 'student') {
             user.profile.bio = bio;
@@ -117,27 +147,65 @@ const updateProfile = async (req, res) => {
     }
 };
 
+const axios = require('axios');
+
 const uploadResume = async (req, res) => {
     try {
-        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
-        const resumePath = `/uploads/${req.file.filename}`;
-        
-        // Extract text from PDF
-        const dataBuffer = fs.readFileSync(req.file.path);
-        const pdfData = await pdf(dataBuffer);
-        const extractedText = pdfData.text;
-        await User.findByIdAndUpdate(req.user.id, {
-            'profile.resume': resumePath,
-            'profile.resumeText': extractedText,
-            'profile.resumeName': req.file.originalname
+        if (!req.file) {
+            return res.status(400).json({ message: 'No file uploaded' });
+        }
+
+        const pdfData = await pdf(req.file.buffer);
+
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    resource_type: 'raw',
+                    folder: 'resumes'
+                },
+                (error, result) => {
+                    if (error) reject(error);
+                    else resolve(result);
+                }
+            );
+
+            stream.end(req.file.buffer);
         });
 
-        res.json({ message: 'Resume uploaded and text extracted successfully', resume: resumePath });
+        const user = await User.findByIdAndUpdate(req.user.id, {
+            'profile.resume': result.secure_url,
+            'profile.resumeText': pdfData.text,
+            'profile.resumeName': req.file.originalname
+        }, { new: true });
+
+        res.json({
+            message: 'Resume uploaded successfully',
+            user
+        });
+
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: 'Error uploading resume' });
+        console.error("ERROR:", err);
+        res.status(500).json({
+            message: 'Error uploading resume',
+            error: err.message
+        });
     }
 };
 
-module.exports = { signup, login, googleLogin, getUser, updateProfile, uploadResume };
+const getProfileById = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        res.json(user);
+    } catch (err) {
+        console.error('Error fetching profile:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { signup, login, googleLogin, getUser, updateProfile, uploadResume, setRole, getProfileById };
+
+

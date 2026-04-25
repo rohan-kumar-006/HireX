@@ -15,41 +15,42 @@ const applyToJob = async (req, res) => {
 
         const existing = await Application.findOne({ job: jobId, student: studentId });
         if (existing) {
-            console.log(`[DUPLICATE DETECTED] User ${studentId} already applied to Job ${jobId}`);
             return res.status(400).json({ message: 'Already applied' });
         }
 
         const job = await Job.findById(jobId);
+        if (!job.isActive) {
+            return res.status(400).json({ message: 'This job is no longer accepting applications' });
+        }
         const student = await User.findById(studentId);
 
         if (!student.profile.resume) {
             return res.status(400).json({ message: 'Please upload your resume in your profile first' });
         }
 
-        // 1. Skill Based Matching (Simple logic)
         const userSkills = student.profile.skills || [];
         const jobSkills = job.requirements || [];
-        const matchedSkills = userSkills.filter(skill => 
+        const matchedSkills = userSkills.filter(skill =>
             jobSkills.some(js => js.toLowerCase() === skill.toLowerCase())
         );
-        
-        const skillScore = jobSkills.length > 0 
-            ? (matchedSkills.length / jobSkills.length) * 100 
+
+        const skillScore = jobSkills.length > 0
+            ? (matchedSkills.length / jobSkills.length) * 100
             : 100;
 
-        // 2. AI Based Matching
-        const aiResult = await matchJob(student.profile.resumeText || "", job.description);
-        console.log(aiResult," Ai Score");
-        
-        // 3. Combine Scores
-        const finalMatchScore = Math.round((skillScore + aiResult.matchScore) / 2);
-        console.log(finalMatchScore," finalMatchScore");
+        let aiResult = { matchScore: 0 };
 
-        // 4. Calculate Missing Skills manually (from structured data)
-        const missingSkills = jobSkills.filter(skill => 
+        try {
+            aiResult = await matchJob(student.profile.resumeText || "", job.description);
+        } catch (e) {
+            console.error("AI failed, fallback used");
+        }
+        const finalMatchScore = Math.round((skillScore + aiResult.matchScore) / 2);
+
+        const missingSkills = jobSkills.filter(skill =>
             !userSkills.some(us => us.toLowerCase() === skill.toLowerCase())
         );
-        
+
         const application = new Application({
             job: jobId,
             student: studentId,
@@ -58,11 +59,9 @@ const applyToJob = async (req, res) => {
         });
 
         await application.save();
-        console.log(`[APPLICATION CREATED] User ${studentId} applied to Job ${jobId}`);
         res.status(201).json({ message: 'Applied successfully!', application });
     } catch (err) {
         if (err.code === 11000) {
-            console.log(`[DB DUPLICATE PREVENTED] User ${req.user.id} tried applying again to Job ${req.params.jobId}`);
             return res.status(400).json({ message: 'Already applied' });
         }
         console.error("Error in applyToJob:", err);
@@ -78,7 +77,6 @@ const uploadResume = async (req, res) => {
         const pdfData = await pdf(dataBuffer);
         const resumeText = pdfData.text;
 
-        // Analyze resume to get skills and suggestions
         const analysis = await analyzeResume(resumeText);
 
         await User.findByIdAndUpdate(req.user.id, {

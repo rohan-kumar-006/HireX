@@ -2,7 +2,6 @@ const axios = require('axios');
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 
-// 🔹 Analyze Resume
 const analyzeResume = async (resumeText) => {
     try {
         const prompt = `Analyze this resume text and return a JSON object with: 
@@ -48,7 +47,6 @@ const analyzeResume = async (resumeText) => {
 
 };
 
-// 🔹 Match Job
 const matchJob = async (resumeText, jobDescription) => {
     try {
         const prompt = `Compare this resume text with the job description. 

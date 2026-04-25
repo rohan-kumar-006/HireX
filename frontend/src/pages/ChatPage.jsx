@@ -3,7 +3,7 @@ import { useParams, useLocation, useNavigate, Link } from 'react-router-dom';
 import io from 'socket.io-client';
 import API from '../api';
 
-const socket = io('http://localhost:5000', {
+const socket = io(import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000', {
     transports: ['websocket']
 });
 
@@ -18,7 +18,6 @@ const ChatPage = () => {
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(true);
     
-    // Get extra info from state if passed
     const { jobTitle, otherUserName, otherUserId } = location.state || {};
 
     const roomId = jobId && applicantId ? `${jobId}_${applicantId}` : null;
@@ -28,7 +27,6 @@ const ChatPage = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
-    // 1. Fetch Conversations List
     useEffect(() => {
         const fetchConversations = async () => {
             try {
@@ -43,7 +41,6 @@ const ChatPage = () => {
         fetchConversations();
     }, [jobId, applicantId]);
 
-    // 2. Fetch Message History for current room
     useEffect(() => {
         if (!roomId) return;
 
@@ -54,10 +51,9 @@ const ChatPage = () => {
         socket.emit('joinRoom', { roomId });
 
         socket.on('receiveMessage', (message) => {
-            if (message.jobId === jobId) { // Simple check to ensure message is for this job
+            if (message.jobId === jobId) {
                  setMessages(prev => [...prev, message]);
             }
-            // Refresh conversation list to show latest message
             API.get('/chat/conversations').then(res => setConversations(res.data));
         });
 
@@ -89,7 +85,6 @@ const ChatPage = () => {
     return (
         <div className="max-w-7xl mx-auto h-[85vh] flex bg-white border rounded-xl overflow-hidden shadow-2xl mt-6">
             
-            {/* Left Sidebar: Conversations List */}
             <div className="w-1/3 border-r bg-gray-50 flex flex-col">
                 <div className="p-4 border-b bg-white">
                     <h2 className="text-xl font-bold text-gray-800">My Chats</h2>
@@ -131,11 +126,9 @@ const ChatPage = () => {
                 </div>
             </div>
 
-            {/* Right Side: Chat Window */}
             <div className="flex-1 flex flex-col bg-white">
                 {roomId ? (
                     <>
-                        {/* Header */}
                         <div className="p-4 border-b bg-gray-50 flex justify-between items-center shadow-sm">
                             <div>
                                 <h2 className="font-bold text-lg text-gray-800">{otherUserName || 'Chat'}</h2>
@@ -143,7 +136,6 @@ const ChatPage = () => {
                             </div>
                         </div>
 
-                        {/* Messages */}
                         <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/30">
                             {messages.map((m, i) => (
                                 <div key={i} className={`flex ${m.senderId === (user.id || user._id) ? 'justify-end' : 'justify-start'}`}>
@@ -161,8 +153,6 @@ const ChatPage = () => {
                             ))}
                             <div ref={messagesEndRef} />
                         </div>
-
-                        {/* Input */}
                         <div className="p-4 border-t bg-white flex gap-3 items-center">
                             <input 
                                 type="text" 

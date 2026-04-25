@@ -106,38 +106,55 @@ const Jobs = () => {
                             <p className="text-gray-600 text-sm">{job.recruiter.name}</p>
                             <p className="text-gray-500 text-sm mt-2">{job.location} · {job.workType}</p>
                             <div className="flex justify-between items-center mt-4">
-                                <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Easy Apply</span>
+                                {job.isActive !== false ? (
+                                    user?.role === 'student' && <span className="text-xs text-green-600 font-bold bg-green-50 px-2 py-1 rounded">Easy Apply</span>
+                                ) : (
+                                    <span className="text-xs text-red-600 font-bold bg-red-50 px-2 py-1 rounded">Closed</span>
+                                )}
                             </div>
                         </div>
                     ))}
                     {jobs.length === 0 && <p className="text-gray-500">No jobs found matching your criteria.</p>}
                 </div>
 
-                {/* Right side: Job Details */}
                 <div className="w-2/3 bg-white border border-gray-200 rounded-lg p-8 sticky top-8 h-fit">
                     {selectedJob ? (
                         <div>
                             <div className="flex justify-between items-start mb-2">
                                 <h2 className="text-3xl font-bold">{selectedJob.title}</h2>
+                                {selectedJob.isActive === false && (
+                                    <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Closed</span>
+                                )}
                             </div>
-                            <p className="text-gray-600 mb-6">{selectedJob.recruiter.name} · {selectedJob.location} · {selectedJob.workType}</p>
-
-                            {user?.role === 'student' ? (
-                                <button
-                                    onClick={() => handleApply(selectedJob._id)}
-                                    disabled={applying}
-                                    className={`bg-green-600 text-white px-8 py-3 rounded-md font-bold hover:bg-green-700 transition mb-8 flex items-center ${applying ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {applying ? 'Applying...' : 'Quick Apply'}
-                                </button>
-                            ) : user?.role === 'recruiter' ? (
-                                <div className="bg-yellow-50 text-yellow-700 p-4 rounded-lg mb-8 border border-yellow-100 text-sm">
-                                    Recruiters cannot apply for jobs.
-                                </div>
-                            ) : (
-                                <Link to="/login" className="inline-block bg-green-600 text-white px-8 py-3 rounded-md font-bold hover:bg-green-700 mb-8">
-                                    Login to Apply
+                             <p className="text-gray-600 mb-6">
+                                <Link to={`/profile/${selectedJob.recruiter._id}`} className="hover:text-green-600 underline transition font-lg">
+                                    {selectedJob.recruiter.name}
                                 </Link>
+                                 · {selectedJob.location} · {selectedJob.workType}
+                            </p>
+
+                            {selectedJob.isActive !== false ? (
+                                user?.role === 'student' ? (
+                                    <button
+                                        onClick={() => handleApply(selectedJob._id)}
+                                        disabled={applying}
+                                        className={`bg-green-600 text-white px-8 py-3 rounded-md font-bold hover:bg-green-700 transition mb-8 flex items-center ${applying ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        {applying ? 'Applying...' : 'Quick Apply'}
+                                    </button>
+                                ) : user?.role === 'recruiter' ? (
+                                    <div className="bg-yellow-50 text-yellow-700 p-4 rounded-lg mb-8 border border-yellow-100 text-sm">
+                                        Recruiters cannot apply for jobs.
+                                    </div>
+                                ) : (
+                                    <Link to="/login" className="inline-block bg-green-600 text-white px-8 py-3 rounded-md font-bold hover:bg-green-700 mb-8">
+                                        Login to Apply
+                                    </Link>
+                                )
+                            ) : (
+                                <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-8 border border-red-100 text-sm font-bold">
+                                    This job is no longer accepting applications.
+                                </div>
                             )}
                             <hr className="mb-8" />
                             <h3 className="font-bold text-lg mb-4">Job details</h3>
